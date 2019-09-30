@@ -159,3 +159,6 @@ generate_solver_logistic_data <- function() {
 # if (not_zero_condition == TRUE || is.na(not_zero_condition)) {
 #   stop("Invalid parameter. \nAll parameters should be strictly positive reals.")
 # }
+
+# Ideally all of the data generation functions should be combined into one 
+#  function with a "method" argument".
