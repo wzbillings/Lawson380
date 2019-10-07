@@ -20,18 +20,6 @@ solve_logistic_equation <-
   return(P)
   }
 
-calc_logistic_derivative <-
-  function(P, t, params) {
-    # This function calculates the derivative of the logistic different equation
-    # with supplied parameters and value P at time t.
-    with(as.list(c(params)), { 
-    
-    dn <- r*P*(1-P/K)
-    return(list(dn))
-    
-    })
-  }
-
 # The logistic growth equation is: dP/dt = rP(1-P/k), where P is the population
 #  size, t is the time, r is the population intrinsic growth rate, and k is the
 #  carrying capacity. The initial population size, P0 is used in the
@@ -116,10 +104,19 @@ generate_RK4_logistic_data <-
   function(P_naught, K, r, max_t, time_step, make_plot = FALSE) {
   # This function uses an ODE solver method in order to generate logistic time
   #  series data rather than the analytic solution.
-  solver_output <- deSolve::ode(y = c("P" = P_naught), 
+  solver_output <- deSolve::ode(y = c(P = P_naught), 
                     times = seq(from = 0, to = max_t, by = time_step), 
-                    func = calc_logistic_derivative, 
-                    parms = c("K" = K, "r" = r))
+                    func = function(t, P, parms) {
+                      # This function calculates the derivative of the logistic 
+                      # differential equation w/ given parameters.
+                      with(as.list(c(P,parms)), { 
+                        
+                        dn <- r * P * (1 - P / K)
+                        list(dn)
+                        
+                      })}, 
+                    parms = c(r = r, K = K),
+                    method = "rk4")
   output <- as.data.frame(solver_output)
   
   # Optionally, generate a plot.
