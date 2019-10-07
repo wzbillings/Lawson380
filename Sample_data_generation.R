@@ -6,7 +6,7 @@
 #  The data replicates 1D logistic population growth.
 ###
 
-require(ODE) # Provides methods for solving ODE problems.
+require(deSolve) # Provides methods for solving ODE problems.
 
 solve_logistic_equation <- 
   function(P0, K, r, t) {
@@ -18,7 +18,15 @@ solve_logistic_equation <-
   A = (K - P0)/P0
   P = K/(1 + A*exp(-r*t))
   return(P)
-}
+  }
+
+calc_logistic_derivative <-
+  function(P, K, r, t) {
+    # This function calculates the derivative of the logistic different equation
+    # with supplied parameters and value P at time t.
+    dn <- r*P*(1-P/K)
+    return(list(dn))
+  }
 
 # The logistic growth equation is: dP/dt = rP(1-P/k), where P is the population
 #  size, t is the time, r is the population intrinsic growth rate, and k is the
@@ -31,29 +39,30 @@ generate_analytic_logistic_data <-
   #  by using the analytic solution to the logistic equation.
   
   # Generate a list of time steps to solve for.
-  t <- seq(from = 1, to = max_t, by = time_step)
+  t <- seq(from = 0, to = max_t, by = time_step)
   # Use the analytic solution to solve for P at each time.
   P <- solve_logistic_equation(P_naught, K, r, t)
   
   # Optionally generate a plot of the logistic curve.
-  if (make_plot = TRUE) {
+  if (make_plot == TRUE) {
     plot(x = t, y = P, ylab = "P(t)", type = "b")
   }
   # Output a list of results to be returned.
-  output <- list(t,P)
+  output <- data.frame(t,P)
   return(output)
 }
 
-generate_noisy_logistic_data <- 
+generate_noisy_analytic_logistic_data <- 
   function(P_naught, K, r, max_t, time_step, noise, make_plot = FALSE) {
   # This function generates sample logistic data using the analytic solution
   #  but with added Gaussian noise with SD equal to noise% of K.
   
   # Generate the time steps to be used.
-  t <- seq(from = 1, to = max_t, by = time_step)
+  t <- seq(from = 0, to = max_t, by = time_step)
   
   # Calculate the analytic solution at each time step.
   P <- solve_logistic_equation(P_naught, K, r, t)
+  P[0] <- P_naught
   
   # Generate noise
   noise_mean <- K
@@ -64,23 +73,38 @@ generate_noisy_logistic_data <-
   P <- P + noise
   
   # Optionally, plot the noisy logistic data.
-  if (make_plot = FALSE) {
+  if (make_plot == TRUE) {
     plot(x = t, y = P, ylab = "P(t)", type = "b")
   }
   
   # Make the two data series to be returned into a list.
-  output <- list(t,P)
+  output <- data.frame(t,P)
   return(output)
 }
 
-generate_euler_logistic_data <- function() {
+generate_euler_logistic_data <- function(P_naught, K, r, max_t, time_step) {
   # This function uses the Euler discretization to generate sample time
   #  series data.
+  
+  t <- seq(from = 0, to = max_t, by = time_step)
+  #t_forward <- t[2:length(t)]
+  #t_present <- t[1:length(t)-1]
+  
+  # Generate vector of P values
+  #P_forward <- solve_logistic_equation(P_naught, K, r, t_forward)
+  #P_present <- solve_logistic_equation(P_naught, K, r, t_present)
+  P <- (1/time_step)*log(P_forward/P_present)
+  
 }
 
-generate_solver_logistic_data <- function() {
+generate_RK4_logistic_data <- function(P_naught, K, r, max_t, time_step) {
   # This function uses an ODE solver method in order to generate logistic time
   #  series data rather than the analytic solution.
+  P <- deSolve::ode(y = c("P" = P_naught), 
+                    times = seq(from = 0, to = max_t, by = time_step), 
+                    func = calc_logistic_derivative, 
+                    parms = c("K" = K, "r" = r),
+                    method = "rk4")
 }
 
 

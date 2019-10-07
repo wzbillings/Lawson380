@@ -8,10 +8,32 @@
 
 require(MASS) # ginv() function source for generalize inverse computation.
 
-prep_data <- function(output_list) {
+prep_data <- function(output_data) {
   # This function takes in a list of the time points and population size values,
   #  and puts it into the form used by the regression methods.
   # This saves a little time on calculations when trying multiple methods.
+
+  # Extract the two vectors from the dataframe to make life easier.
+  t <- output_data$t
+  P <- output_data$P
+  
+  # Calculate the maximum time value and the time step from the list of times,
+  #  assuming evenly spaced time points.
+  max_t <- max(t)
+  time_step <- t[[2]] - t[[1]]
+  
+  # We need to use P_n and P_{n+1} for the least squares method, so calculate
+  #  those here.
+  P_forward <- P[2:max_t]
+  P_present <- P[1:(max_t - 1)]
+  
+  processed_data <- list(
+    "forward" <- P_forward,
+    "present" <- P_present,
+    "step" <- time_step
+  )
+  
+  return(processed_data)
 }
 
 model_logistic_data <- 
@@ -22,19 +44,9 @@ model_logistic_data <-
     # The input should be a list where the first entry is the time values and the
     #  second entry is the population size values at each time.
     
-    # Extract the two vectors from the list to make life easier.
-    t <- list[[1]]
-    P <- list[[2]]
-    
-    # Calculate the maximum time value and the time step from the list of times,
-    #  assuming evenly spaced time points.
-    max_t <- max(t)
-    time_step <- t[[2]] - t[[1]]
-    
-    # We need to use P_n and P_{n+1} for the least squares method, so calculate
-    #  those here.
-    P_forward <- P[2:max_t]
-    P_present <- P[1:(max_t - 1)]
+    P_forward <- list[[1]]
+    P_present <- list[[2]]
+    time_step <- list[[3]]
     
     # The least squares algorithm for this model can be shown to estimate r and
     #   m = r/K when b = 1/t((P+1)/P) and A = (1 - P). The solution will be
@@ -53,7 +65,7 @@ model_logistic_data <-
     
     # Optionally make a linear plot showing the data the regression equation
     #  is obtained from.
-    if (make_plot = TRUE) {
+    if (make_plot == TRUE) {
       plot(P_present, b)
     }
     
