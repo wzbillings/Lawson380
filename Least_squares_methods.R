@@ -27,26 +27,27 @@ prep_data <- function(output_data) {
   P_forward <- P[2:max_t]
   P_present <- P[1:(max_t - 1)]
   
-  processed_data <- list(
-    "forward" <- P_forward,
-    "present" <- P_present,
-    "step" <- time_step
-  )
+  # processed_data <- list(
+  #   "forward" <- P_forward,
+  #   "present" <- P_present,
+  #   "step" <- time_step
+  # )
   
-  return(processed_data)
+  return(c(P_forward,P_present,time_step))
 }
 
 model_logistic_data <- 
-  function(list, make_plot = FALSE){
+  function(input_data, make_plot = FALSE){
     # This function uses a derived least-squares method with an Euler
     #  discretization in order to solve for the parameters of the logistic
     #  equation modeling the inputted data.
-    # The input should be a list where the first entry is the time values and the
-    #  second entry is the population size values at each time.
+    # The input should be a data frame returned from one of the generators.
     
-    P_forward <- list[[1]]
-    P_present <- list[[2]]
-    time_step <- list[[3]]
+    # Configure input correctly
+    list[P_forward, P_present, time_step] <- prep_data(input_data)
+    # P_forward <- input_list[[1]]
+    # P_present <- input_list[[2]]
+    # time_step <- input_list[[3]]
     
     # The least squares algorithm for this model can be shown to estimate r and
     #   m = r/K when b = 1/t((P+1)/P) and A = (1 - P). The solution will be
