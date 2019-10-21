@@ -14,8 +14,8 @@ prep_data <- function(output_data) {
   # This saves a little time on calculations when trying multiple methods.
 
   # Extract the two vectors from the dataframe to make life easier.
-  t <- output_data[ ,1]
-  P <- output_data[ ,2]
+  t <- output_data$t
+  P <- output_data$P
   
   # Calculate the maximum time value and the time step from the list of times,
   #  assuming evenly spaced time points.
@@ -27,13 +27,14 @@ prep_data <- function(output_data) {
   P_forward <- P[2:max_t]
   P_present <- P[1:(max_t - 1)]
   
-  # processed_data <- list(
-  #   "forward" <- P_forward,
-  #   "present" <- P_present,
-  #   "step" <- time_step
-  # )
+  processed_data <- list(
+    "forward" <- P_forward,
+    "present" <- P_present,
+    "step" <- time_step
+  )
   
-  return(c(P_forward,P_present,time_step))
+  # return(c(P_forward,P_present,time_step))
+  return(processed_data)
 }
 
 model_logistic_data <- 
@@ -44,10 +45,10 @@ model_logistic_data <-
     # The input should be a data frame returned from one of the generators.
     
     # Configure input correctly
-    list[P_forward, P_present, time_step] <- prep_data(input_data)
-    # P_forward <- input_list[[1]]
-    # P_present <- input_list[[2]]
-    # time_step <- input_list[[3]]
+    #list[P_forward, P_present, time_step] <- prep_data(input_data)
+    P_forward <- input_data[[1]]
+    P_present <- input_data[[2]]
+    time_step <- input_data[[3]]
     
     # The least squares algorithm for this model can be shown to estimate r and
     #   m = r/K when b = 1/t((P+1)/P) and A = (1 - P). The solution will be
@@ -60,7 +61,7 @@ model_logistic_data <-
     # Now knowing that m = r/K, we solve for K.
     r_hat <- params[1]
     m_hat <- params[2]
-    K_hat <- (1/m_hat)*r_hat
+    K_hat <- (r_hat/m_hat)
     cat("The estimated growth rate is:", r_hat,
         "\nThe estimated carrying capacity is:", K_hat, "\n")
     
@@ -101,7 +102,7 @@ model_every_other_odd <- function(input_data) {
   return(model)
 }
 
-model_every_other_even <- function() {
+model_every_other_even <- function(input_data) {
   # Estimate time series parameters from data points 2, 4, 6, ... last even.
   even_indices <- seq(from = 2, to = nrow(input_data), by = 2)
   even_data <- input_data[even_indices, ]
