@@ -14,8 +14,8 @@ prep_data <- function(output_data) {
   # This saves a little time on calculations when trying multiple methods.
 
   # Extract the two vectors from the dataframe to make life easier.
-  t <- output_data$t
-  P <- output_data$P
+  t <- output_data[ ,1]
+  P <- output_data[ ,2]
   
   # Calculate the maximum time value and the time step from the list of times,
   #  assuming evenly spaced time points.
@@ -78,25 +78,49 @@ model_logistic_data <-
 model_beginning_only <- function() {
   # Estimate time series parameters from data before the inflection point of
   #  the logistic curve.
+  
+  # How to find the inflection point? 
+  # Source: https://socratic.org/questions/how-do-you-find-the-inflection-point-of-a-logistic-function
+  # The inflection point is at (ln(A)/K, K/2), so the inflection point is at
+  #  the spot where the population is half the carrying capacity.
+  # BUT we are estimating the carrying capacity!
 }
 
 model_end_only <- function() {
   # Estimate time series parameters from data after the inflection point of
   #  the logistic curve.
+  
+  # Same issue as above!
 }
 
-model_every_other_odd <- function() {
+model_every_other_odd <- function(input_data) {
   # Estimate time series parameters from data points 1, 3, 5, ... last odd.
+  odd_indices <- seq(from = 1, to = nrow(input_data), by = 2)
+  odd_data <- input_data[odd_indices, ]
+  model <- model_logistic_data(odd_data)
+  return(model)
 }
 
 model_every_other_even <- function() {
   # Estimate time series parameters from data points 2, 4, 6, ... last even.
+  even_indices <- seq(from = 2, to = nrow(input_data), by = 2)
+  even_data <- input_data[even_indices, ]
+  model <- model_logistic_data(even_data)
+  return(model)
 }
 
-model_random_sample <- function() {
-  # Estimate time series parameters from a random subset of data points.
+model_random_sample <- function(input_data) {
+  # Estimate time series parameters from a random subset of half the 
+  #  data points.
+  num_samples <- floor(0.5 * nrow(input_data))
+  sample_data <- input_data[sample(nrow(input_data), num_samples), ]
+  model <- model_logistic_data(sample_data)
+  return(model)
 }
 
-calculate_SSR <- function() {
+calculate_SSR <- function(model) {
   # Calculate the sum of squared residuals for a model.
+  model_residuals <- model$residuals
+  SSR <- sum(model_residuals ^ 2)
+  return(SSR)
 }
