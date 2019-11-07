@@ -21,3 +21,5 @@ model3 <- model_logistic_data(this3)
 
 # If noise parameter is 0, this works.
 # If noise parameter is 0.00004, works perfectly. BUT not for 0.0004!
+# Does stronger initial growth give better answers?
+# If we have a smaller gap between P0 and K, do we get better answers?

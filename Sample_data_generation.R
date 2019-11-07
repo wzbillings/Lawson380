@@ -147,6 +147,44 @@ generate_euler_logistic_data <-
   return(output)
 }
 
+generate_noisy_euler_logistic_data <- 
+  function(P_naught, K, r, max_t, time_step, noise, make_plot = FALSE) {
+  # This function uses the Euler discretization of the logistic growth DE in 
+  #  order to generate time series data. Noise is added to the data.
+  
+  # Make sure that all inputs are strictly positive integers.
+  validate_inputs(P_naught, K, r, max_t, time_step)  
+  
+  # Create a vector of times to use.
+  t <- seq(from = 0, to = max_t, by = time_step)
+  # Intialize P_naught.
+  P <- numeric(length(t))
+  P[1] <- P_naught
+  
+  # Calculate all of the values of P.
+  for (j in 2:length(t)) {
+    P[j] <- P[j - 1] + r*P[j - 1] * (1 - P[j - 1]/K) * time_step
+  }
+  
+  # Generate noise
+  noise_mean <- 0
+  noise_sd <- noise * K
+  noise_vector <- rnorm(length(P), noise_mean, noise_sd)
+  
+  # Add noise to P values.
+  P <- P + noise_vector
+  
+  # Optionally, plot the data.
+  if (make_plot == TRUE) {
+    plot(x = t, y = P, ylab = "P(t)")
+  }
+  
+  # Create output dataframe
+  output <- data.frame(t,P)
+  return(output)  
+  
+}
+
 generate_solver_logistic_data <- 
   function(P_naught, K, r, max_t, time_step, make_plot = FALSE) {
   # This function uses an ODE solver method in order to generate logistic time
@@ -175,26 +213,38 @@ generate_solver_logistic_data <-
   return(output)
 }
 
-
-# Explore sensitivities
-# use ODE solver to generate data instead! Check if this breaks everything!
-# Use euler method to generate data--if we still get error back from this, we
-#  can tell how much the least squares machinery is breaking.
-
-# What techniques work best with no noise?
-# Testing data series before or after inflection point -- where does the error
-#  show up at?
-# What if we sample every other data point? How does this affect error?
-#  Residuals of this curve with the better curve--residuals of missing points?
-#  Metric: sum of squared residuals.
-# Sum of residuals is net error squared, this is our objective fcn.
-# Then we can sample other subsets, e.g. just the front, just the back, and
-#  random sampling. Use multiple fits to fit data and one fit to test.
-# Weighting least squares with smoothing--kind of like Lagrange multipliers.
-
-# Ideally all of the data generation functions should be combined into one 
-#  function with a "method" argument".
-
-# Re-test noisy logistic fit to get back parameter.
-# Try Euler method with deSolve!
-# Compare Euler w/ Analytic
+generate_noisy_solver_logistic_data <- 
+  function(P_naught, K, r, max_t, time_step, noise, make_plot = FALSE) {
+    # This function uses an ODE solver method in order to generate logistic time
+    #  series data rather than the analytic solution. Adds noise.
+    
+    # Make sure that all inputs are strictly positive integers.
+    validate_inputs(P_naught, K, r, max_t, time_step)  
+    
+    # Use the default ode solver method to generate time series data.    
+    solver_output <- deSolve::ode(
+      y = c(P = P_naught), 
+      times = seq(from = 0, to = max_t, by = time_step), 
+      func = calculate_logistic_derivative, 
+      parms = c(r = r, K = K)
+    )
+    
+    # The output is a "deSolve" object which can be coerced into a data frame.
+    output <- as.data.frame(solver_output)
+    
+    # Generate noise
+    noise_mean <- 0
+    noise_sd <- noise * K
+    noise_vector <- rnorm(length(output$P), noise_mean, noise_sd)
+    
+    # Add noise to P values.
+    output$P <- output$P + noise_vector
+    
+    # Optionally, generate a plot.
+    if (make_plot == TRUE) {
+      plot(output, ylab = "P(t)")
+    }
+    
+    # Return output data frame
+    return(output)
+}

@@ -76,7 +76,7 @@ model_logistic_data <-
     return(output_params)
   }
 
-model_beginning_only <- function() {
+model_beginning_only <- function(input_data, make_plot = FALSE) {
   # Estimate time series parameters from data before the inflection point of
   #  the logistic curve.
   
@@ -85,39 +85,167 @@ model_beginning_only <- function() {
   # The inflection point is at (ln(A)/K, K/2), so the inflection point is at
   #  the spot where the population is half the carrying capacity.
   # BUT we are estimating the carrying capacity!
+  
+  # Configure input correctly
+  #list[P_forward, P_present, time_step] <- prep_data(input_data)
+  P_forward <- input_data[[1]]
+  P_present <- input_data[[2]]
+  time_step <- input_data[[3]]
+  
+  # Assume the model goes to K eventually.
+  inflection_point <- max(P_forward) / 2
+  
+  # Only take values less than the inflection point.
+  P_forward <- P_forward[P_forward <= inflection_point]
+  P_present <- P_present[1:length(P_forward)]
+  
+  # Run the OLS model.
+  b <- (1/time_step)*log(P_forward/P_present)
+  A <- cbind(rep(1, length(P_present)), -P_present)
+  params <- MASS::ginv(t(A) %*% A) %*% t(A) %*% b
+  
+  # Now knowing that m = r/K, we solve for K.
+  r_hat <- params[1]
+  m_hat <- params[2]
+  K_hat <- (r_hat/m_hat)
+  cat("The estimated growth rate is:", r_hat,
+      "\nThe estimated carrying capacity is:", K_hat, "\n")
+  
+  # Optionally make a linear plot showing the data the regression equation
+  #  is obtained from.
+  if (make_plot == TRUE) {
+    plot(P_present, b)
+  }
+  
+  # Collect outputs into a vector and return.
+  output_params <- as.numeric(r_hat, K_hat)
+  return(output_params)
+  
 }
 
-model_end_only <- function() {
+model_end_only <- function(input_data, make_plot = FALSE) {
   # Estimate time series parameters from data after the inflection point of
   #  the logistic curve.
   
-  # Same issue as above!
+  # Configure input correctly
+  #list[P_forward, P_present, time_step] <- prep_data(input_data)
+  P_forward <- input_data[[1]]
+  P_present <- input_data[[2]]
+  time_step <- input_data[[3]]
+  
+  # Assume the model goes to K eventually.
+  inflection_point <- max(P_forward) / 2
+  
+  # Only take values less than the inflection point.
+  P_forward <- P_forward[P_forward >= inflection_point]
+  P_present <- P_present[1:length(P_forward)]
+  
+  # Run the OLS model.
+  b <- (1/time_step)*log(P_forward/P_present)
+  A <- cbind(rep(1, length(P_present)), -P_present)
+  params <- MASS::ginv(t(A) %*% A) %*% t(A) %*% b
+  
+  # Now knowing that m = r/K, we solve for K.
+  r_hat <- params[1]
+  m_hat <- params[2]
+  K_hat <- (r_hat/m_hat)
+  cat("The estimated growth rate is:", r_hat,
+      "\nThe estimated carrying capacity is:", K_hat, "\n")
+  
+  # Optionally make a linear plot showing the data the regression equation
+  #  is obtained from.
+  if (make_plot == TRUE) {
+    plot(P_present, b)
+  }
+  
+  # Collect outputs into a vector and return.
+  output_params <- as.numeric(r_hat, K_hat)
+  return(output_params)
 }
 
-model_every_other_odd <- function(input_data) {
+model_every_other_odd <- function(input_data, make_plot = FALSE) {
   # Estimate time series parameters from data points 1, 3, 5, ... last odd.
-  odd_indices <- seq(from = 1, to = nrow(input_data), by = 2)
-  odd_data <- input_data[odd_indices, ]
-  model <- model_logistic_data(odd_data)
-  return(model)
+  
+  # Configure input correctly
+  #list[P_forward, P_present, time_step] <- prep_data(input_data)
+  P_forward <- input_data[[1]]
+  P_present <- input_data[[2]]
+  time_step <- input_data[[3]]
+  
+  # Only take odd indices.
+  odd_indices <- seq(from = 1, to = length(P_forward), by = 2)
+  P_forward <- P_forward[odd_indices]
+  P_present <- P_present[odd_indices]
+  
+  # Run the OLS model.
+  b <- (1/time_step)*log(P_forward/P_present)
+  A <- cbind(rep(1, length(P_present)), -P_present)
+  params <- MASS::ginv(t(A) %*% A) %*% t(A) %*% b
+  
+  # Now knowing that m = r/K, we solve for K.
+  r_hat <- params[1]
+  m_hat <- params[2]
+  K_hat <- (r_hat/m_hat)
+  cat("The estimated growth rate is:", r_hat,
+      "\nThe estimated carrying capacity is:", K_hat, "\n")
+  
+  # Optionally make a linear plot showing the data the regression equation
+  #  is obtained from.
+  if (make_plot == TRUE) {
+    plot(P_present, b)
+  }
+  
+  # Collect outputs into a vector and return.
+  output_params <- as.numeric(r_hat, K_hat)
+  return(output_params)
+  
 }
 
-model_every_other_even <- function(input_data) {
+model_every_other_even <- function(input_data, make_plot = FALSE) {
   # Estimate time series parameters from data points 2, 4, 6, ... last even.
-  even_indices <- seq(from = 2, to = nrow(input_data), by = 2)
-  even_data <- input_data[even_indices, ]
-  model <- model_logistic_data(even_data)
-  return(model)
+  
+  # Configure input correctly
+  #list[P_forward, P_present, time_step] <- prep_data(input_data)
+  P_forward <- input_data[[1]]
+  P_present <- input_data[[2]]
+  time_step <- input_data[[3]]
+  
+  # Only take even indices.
+  even_indices <- seq(from = 2, to = length(P_forward), by = 2)
+  P_forward <- P_forward[even_indices]
+  P_present <- P_present[even_indices]
+  
+  # Run the OLS model.
+  b <- (1/time_step)*log(P_forward/P_present)
+  A <- cbind(rep(1, length(P_present)), -P_present)
+  params <- MASS::ginv(t(A) %*% A) %*% t(A) %*% b
+  
+  # Now knowing that m = r/K, we solve for K.
+  r_hat <- params[1]
+  m_hat <- params[2]
+  K_hat <- (r_hat/m_hat)
+  cat("The estimated growth rate is:", r_hat,
+      "\nThe estimated carrying capacity is:", K_hat, "\n")
+  
+  # Optionally make a linear plot showing the data the regression equation
+  #  is obtained from.
+  if (make_plot == TRUE) {
+    plot(P_present, b)
+  }
+  
+  # Collect outputs into a vector and return.
+  output_params <- as.numeric(r_hat, K_hat)
+  return(output_params)
 }
 
-model_random_sample <- function(input_data) {
-  # Estimate time series parameters from a random subset of half the 
-  #  data points.
-  num_samples <- floor(0.5 * nrow(input_data))
-  sample_data <- input_data[sample(nrow(input_data), num_samples), ]
-  model <- model_logistic_data(sample_data)
-  return(model)
-}
+# model_random_sample <- function(input_data) {
+#   # Estimate time series parameters from a random subset of half the 
+#   #  data points.
+#   num_samples <- floor(0.5 * nrow(input_data))
+#   sample_data <- input_data[sample(nrow(input_data), num_samples), ]
+#   model <- model_logistic_data(sample_data)
+#   return(model)
+# }
 
 calculate_SSR <- function(model) {
   # Calculate the sum of squared residuals for a model.
