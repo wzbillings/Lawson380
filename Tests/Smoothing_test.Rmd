@@ -19,26 +19,26 @@ set.seed(100)
 
 # Testing two-dimensional smoothing.
 
-```{r 2D Data}
-test_2d_nn <- generate_analytic_logistic_data(10, 100, 0.1, 75, 0.1, TRUE)
-test_2d_wn <- generate_noisy_analytic_logistic_data(10, 100, 0.1, 75, 0.1, 0.04, TRUE)
+```{r 2 Parameter Data}
+test_2p_nn <- generate_analytic_logistic_data(10, 100, 0.1, 75, 0.1, TRUE)
+test_2p_wn <- generate_noisy_analytic_logistic_data(10, 100, 0.1, 75, 0.1, 0.04, TRUE)
 ```
 
 Testing the smoothing model.
 
-```{r 2d Fitting}
-prep_2d_nn <- prep_data(test_2d_nn)
-prep_2d_wn <- prep_data(test_2d_wn)
+```{r 2p Fitting}
+prep_2p_nn <- prep_data(test_2p_nn)
+prep_2p_wn <- prep_data(test_2p_wn)
 
 # Low smoothing works the same with no noise.
 cat("Regular; no noise.\n")
-plain_2d_nn <- model_logistic_data(prep_2d_nn)
+plain_2p_nn <- model_logistic_data(prep_2p_nn)
 cat("Smoothing = 0.001; no noise\n")
-ridge_2d_nn <- model_logistic_data_smoothing(prep_2d_nn, 0.001)
+ridge_2p_nn <- model_logistic_data_smoothing(prep_2p_nn, 0.001)
 
 # Testing the regular model with noise.
 cat("Regular; 4% noise.\n")
-plain_2d_wn <- model_logistic_data(prep_2d_wn)
+plain_2p_wn <- model_logistic_data(prep_2p_wn)
 ```
 
 Test a range of smoothing values.
@@ -48,46 +48,46 @@ i <- 1
 for (lambda in smoothing_vals) {
   msg <- paste0("Smoothing = ", lambda, "\n")
   cat(msg)
-  name <- paste0("smoothing_2d_", i)
+  name <- paste0("smoothing_2p_", i)
   i <- i + 1
-  model <- model_logistic_data_smoothing(prep_2d_wn, lambda)
+  model <- model_logistic_data_smoothing(prep_2p_wn, lambda)
   assign(x = name, value = model)
 }
 ```
 
 Now, generate two one-dimensional test-cases.
-```{r 1D data}
-test_1d_nn <- generate_dimensionless_logistic_data(.1, 0.1, 50, 0.1, TRUE)
-test_1d_wn <- generate_noisy_dimensionless_logistic_data(0.1, 0.1, 0.04, 50, 0.1, TRUE)
+```{r 1p data}
+test_1p_nn <- generate_dimensionless_logistic_data(.1, 0.1, 50, 0.1, TRUE)
+test_1p_wn <- generate_noisy_dimensionless_logistic_data(0.1, 0.1, 0.04, 50, 0.1, TRUE)
 ```
 
 Doing the fits.
 
-```{r 1d Fitting}
-prep_1d_nn <- prep_data(test_1d_nn)
-prep_1d_wn <- prep_data(test_1d_wn)
+```{r 1p Fitting}
+prep_1p_nn <- prep_data(test_1p_nn)
+prep_1p_wn <- prep_data(test_1p_wn)
 
 # Low smoothing works the same with no noise.
 cat("Regular; no noise.\n")
-plain_1d_nn <- model_logistic_data_1D(prep_1d_nn)
+plain_1p_nn <- model_logistic_data_dimensionless(prep_1p_nn)
 cat("Smoothing = 0.001; no noise\n")
-ridge_1d_nn <- model_logistic_data_1D_smoothing(prep_1d_nn, 0.001)
+ridge_1p_nn <- model_logistic_data_dimensionless_smoothing(prep_1p_nn, 0.001)
 
 # Testing the regular model with noise.
 cat("Regular; 4% noise.\n")
-plain_1d_wn <- model_logistic_data_1D(prep_1d_wn)
+plain_1p_wn <- model_logistic_data_dimensionless(prep_1p_wn)
 ```
 
-Testing a bunch of smoothing values in the 1D case.
-```{r 1D Smoothing test}
+Testing a bunch of smoothing values in the 1p case.
+```{r 1p Smoothing test}
 smoothing_vals <- c(0.001, 0.01, 0.1, 1, 2, 5, 10, 100)
 i <- 1
 for (lambda in smoothing_vals) {
   msg <- paste0("Smoothing = ", lambda, "\n")
   cat(msg)
-  name <- paste0("smoothing_1d_", i)
+  name <- paste0("smoothing_1p_", i)
   i <- i + 1
-  model <- model_logistic_data_1D_smoothing(prep_1d_wn, lambda)
+  model <- model_logistic_data_dimensionless_smoothing(prep_1p_wn, lambda)
   assign(x = name, value = model)
 }
 ```

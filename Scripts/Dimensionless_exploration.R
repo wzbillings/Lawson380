@@ -10,7 +10,7 @@
 ### COPIED CODE FIX THIS ###
 require(MASS) # ginv() function source for generalize inverse computation.
 
-model_logistic_data_1D <- 
+model_logistic_data_dimensionless <- 
   function(input_data, make_plot = FALSE){
     # This function uses a derived least-squares method with an Euler
     #  discretization in order to solve for the parameters of the logistic
@@ -45,7 +45,7 @@ model_logistic_data_1D <-
     return(output_params)
   }
 
-model_logistic_data_1D_smoothing <- 
+model_logistic_data_dimensionless_smoothing <- 
   function(input_data, smoothing_val, make_plot = FALSE){
     # This function uses a derived least-squares method with an Euler
     #  discretization in order to solve for the parameters of the logistic
