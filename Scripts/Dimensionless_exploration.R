@@ -52,6 +52,8 @@ model_logistic_data_dimensionless_smoothing <-
     #  equation modeling the inputted data.
     # The input should be a data frame returned from one of the generators.
     
+    validate_inputs(smoothing_val)
+    
     # Configure input correctly
     #list[P_forward, P_present, time_step] <- prep_data(input_data)
     P_forward <- input_data[[1]]
@@ -65,7 +67,10 @@ model_logistic_data_dimensionless_smoothing <-
     b <- (1/time_step)*log(P_forward/P_present)
     A <- 1 - P_present
     ATA <- t(A) %*% A
-    ID <- diag(nrow(ATA))
+    ID <- diag(nrow = nrow(ATA))
+    # Would QR make a difference here? Probably not...
+    # But when do you smooth vs. QR/SVD?
+    # SVD and throwing away extreme eigenvalues.
     params <- MASS::ginv(ATA + smoothing_val * ID) %*% t(A) %*% b
     
     r_hat <- params[1]

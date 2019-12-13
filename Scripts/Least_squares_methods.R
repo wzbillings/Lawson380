@@ -39,7 +39,7 @@ model_logistic_data <-
     # Optionally make a linear plot showing the data the regression equation
     #  is obtained from.
     if (make_plot == TRUE) {
-      plot(P_present, b)
+      plot(P_present, 1/b)
     }
     
     # Collect outputs into a vector and return.
@@ -88,7 +88,7 @@ model_beginning_only <- function(input_data, make_plot = FALSE) {
   # Optionally make a linear plot showing the data the regression equation
   #  is obtained from.
   if (make_plot == TRUE) {
-    plot(P_present, b)
+    plot(P_present, 1/b)
   }
   
   # Collect outputs into a vector and return.
@@ -132,7 +132,7 @@ model_end_only <- function(input_data, make_plot = FALSE) {
   # Optionally make a linear plot showing the data the regression equation
   #  is obtained from.
   if (make_plot == TRUE) {
-    plot(P_present, b)
+    plot(P_present, 1/b)
   }
   
   # Collect outputs into a vector and return.
@@ -178,7 +178,7 @@ model_logistic_data_smoothing <-
     # Optionally make a linear plot showing the data the regression equation
     #  is obtained from.
     if (make_plot == TRUE) {
-      plot(P_present, b)
+      plot(P_present, 1/b)
     }
     
     # Collect outputs into a list and return.
