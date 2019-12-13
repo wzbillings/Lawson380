@@ -1,0 +1,201 @@
+---
+title: "Fall 2019 Research Manuscript"
+author: "Zane Billings"
+date: "12 December, 2019"
+output: pdf_document
+bibliography: references.bib
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+if (require('here')==FALSE) {install.packages('here', repos="https://cran.rstudio.com")} else {require('here')}
+```
+
+# Introduction
+
+The main goal of my research this semester was to investigate errors in the use of an ordinary least squares regression method for fitting parameters to the one-species logistic growth mode. 
+
+## One-Species Logistic Growth
+
+The one-species logistic growth model describes the change in the population size of a species with a given intrinsic growth rate, $r$, and a carrying-capacity, $K$. Mathematically, the model is given as
+$$\frac{dP}{dt} = rP(1-\frac{P}{K}),$$
+and its analytic solution is
+$$P(t) = \frac{KP_0}{P_0 + (K - P_0)e^{-rt}},$$
+where $P_0$ is the initial population size at time $t = 0$  [@logistic].
+
+The classical example of the validity of the logistic growth model is P.F. Verhulst's logistic fit of U.S. census data. In 1840, he used census data from the previous five censuses (1790 - 1840) to predict the population of the United States in 1940, with a surprisingly accurate result. Verhulst's results are reproduced in @logistic, but as I do not read French, I could not repeat them myself from the source material. Pearl and Reed also provided a  similar model of census data [@pearl], although both of these logistic models became inaccurate over time. An ecological application of the model occurs in @alliende, where the growth of willow trees was modelled after rabbits were removed from a specific area in Austrailia.
+
+The model assumes that carrying capacity is constant, the population is not age-stratified (i.e., each individual has the same probability of dying or reproducing) and furthermore, all members of the population experience the same effects of density, birth and rate rates are linear functions of population size--also referred to as linear density dependence of the population, no stochastic effects act on the population, and finally, density has an instantaneous effect on the population [@rockwood, pp. 46]. @rockwood [cp. 2] provides several more examples of populations which seem to fit these criteria.
+
+Noting that such microorganisms as *Paramecium sp.*, yeasts, and diatoms (again, from [@rockwood]) tend to follow logistic growth curves when grown in the lab, the idea that bacteria follow this model is not unreasonable (although the careful biologist will note that all three provided examples are eukaryotes and are much larger in size than bacteria).
+
+## Two-Species Logistic Growth
+
+The overarching goal of the research group is to analyze the model posed by [@stein], which is an \(n\)-dimensional  Lotka-Volterra competition model between several species. We wish to analyze whether a subset of the larger model will produce the same results. That is, if we take a pair of species analyzed in the model using all species, will a model created with just that pair of species give the same results?
+
+In order to analyze competition between two species of gut bacteria, we apply the Lotka-Volterra model of interspecies competition:
+\begin{align*}
+\frac{dP_1}{dt} &= r_1P_1 \left(1 - \left(\frac{P_1 + \alpha_{12}P_2}{K_1}\right)\right) \\
+\frac{dP_2}{dt} &= r_2P_2 \left(1 - \left(\frac{P_2 + \alpha_{21}P_1}{K_2}\right)\right)
+\end{align*}
+
+where \(P_i\) is the population size, \(r_i\) is the intrinsic growth rate, and \(K_i\) is the carrying capacity, all of species \(i\). The \(\alpha_{ij}\) term refers to the competitive effect of species \(j\) on species \(i\) [@rockwood]. It is typically convinient to write the Lotka-Volterra equations in a simplified form:
+\begin{align*}
+\frac{dx}{dt} &= ax + bxy \\
+\frac{dy}{dt} &= cy + dxy
+\end{align*}
+
+where \(a\) and \(c\) represent intrinsic rates of growth and \(b\) and \(d\) represent the overall effect of competition on a species.
+
+## The Error Problem
+
+Given exact data, previous results (from HMBG) have shown that parameters can be fitted to the two-dimensional model using an ordinary least-squares method given by [@stein]. However, when Gaussian noise (with a mean equal to 0 and a standard deviation of 4\% of the equilibrium value of the system) is introduced, predictions become much less reliable.
+
+In order to examine this error further, I have analyzed this method in the one-dimensional case.
+
+## One-Dimensional Least Squares Method
+
+Given the logistic equation described above, we wish to construct a least squares problem which will predict the values of \(r\) and \(K\) given time series data representing the population size of a population following logistic growth over time. Expanding the logistic growth equation as given earlier, we have that 
+$$\frac{dP}{dt} = rP(1-\frac{P}{K}) = rP - \frac{r}{k}P^2,$$
+and thus
+$$\frac{dP}{dt}\frac{1}{P} =  \frac{d \ln P}{dt} = r - \frac{r}{k}P,$$
+assuming that \(P \neq 0\), since our problem would not be very interesting if this were the case. This method is used by @stein in this way, and is also used by @kloppers. Finally, we discretize the system in order to obtain a discrete-time dynamical system rather than a continuous differential equation model, and we get
+$$ \frac{d \ln P}{dt} \approx \frac{\ln(P(t_{i+1})) - \ln(P(t_i))}{t_{i+1} - t_i} = \frac{\ln\left(\frac{(P(t_{i+1}))}{P(t_i)}\right)}{\Delta t_i} = \frac{1}{\Delta t}\ln\left(\frac{(P(t_{i+1}))}{P(t_i)}\right).$$
+
+Then, returning to our model, we have 
+$$\frac{1}{\Delta t}\ln\left(\frac{(P(t_{i+1}))}{P(t_i)}\right) = r - \frac{r}{K}P(t_i)$$
+
+Now, denote $P(t_I)$ as $P_i$ for all $i$. We then convert to a matrix equation to get
+$$ \frac{1}{\Delta t} \ln\left(\frac{P_{i+1}}{P_i}\right) = \begin{bmatrix} 1 & -P_i \end{bmatrix} \begin{bmatrix} r \\ \frac{r}{k} \end{bmatrix},$$
+
+which is an equation of the form
+
+$$\vec{b} = A\vec{x}. $$
+
+So, applying the ordinary least squares method, we get that the optimal parameters are given by
+$$\vec{x} = (A^TA)^{-1}A^T\vec{b}.$$
+
+And this is the least squares method we have explored over the semester. After developing this model, we also considered a model with smoothing (a.k.a. Tikhonov regularization) applied, which can help correct parameter estimations by forcing the parameter values to be smaller. The smoothed least squares method we used has a solution given by
+
+$$\vec{x} = (A^TA - \lambda I)^{-1}A^T\vec{b}, $$
+where $\lambda \in \mathbb{R}$ [@tik].
+
+## My Goals
+Over the course of the semester, my goals were to:
+\begin{itemize}
+\item Develop \texttt{R} code to generate time-series logistic growth data for one species, and to fit the ordinary least squares model (as described above) to this data;
+\item Using these codes, examine the error in the one species logistic growth model, and determing if smoothing (Tihkonov regularization) was effective in obtaining better parameter estimates; and
+\item Examine the dimensionless one species logistic growth model, which only has one parameter, determine if this model suffers from the same error problem, and examine the effect of smoothing.
+\end{itemize}
+
+# Results
+
+## `R` Codes for Data Generation and Fitting
+
+All scripts which I have created this semester can be found on the [Github page.](https://github.com/wz-billings/Lawson380). All of the scripts mentioned below likely rely on the functions in the `Helpers.R` script file. I am working on an improved pipeline which is simpler to implement, but I do not know how long it will be before this is finished; ideally I will be able to streamline both the generation/fitting process and the usability and portability of the functions.
+
+I have successfully created several methods for generating time-series one species logistic growth data. These functions are provided in the `Sample_data_generation.R` file, which can be sourced into any R or Rmd file fairly easily. Data can be generated with the following methods:
+\begin{itemize}
+\item The analytic solution to the logistic growth ODE.
+\item The Euler discretization to the logistic growth ODE.
+\item A numerical ODE solver, specifically \texttt{deSolve::ode()}.
+\item All of these methods can be adjusted to include Gaussian noise.
+\end{itemize}
+
+Additionally, I've generated a suite of functions for fitting the least squares model to the generated data. These methods are provided in the `Least_squares_methods.R` script.
+
+\begin{itemize}
+\item There is a function which takes in prepped data (prepared via \texttt{prep\_data()} in the \texttt{Helpers.R} script) and fits the model to all of the data, as you would do normally.
+\item The data can be fitted using only the data either before or after the inflection point (which we used to experiment with fitting).
+\item There is a function for fitting with smoothing that also accepts the lambda parameter for implementing Tikhonov regularization.
+\item Eventually there will be a function for fitting a model to a random sample of the data points, but this is not currently implemented.
+\end{itemize}
+
+The `Dimensionless_exploration.R` file provides several functions which do the same thing as the above listed functions, but for the dimensionless one-parameter model rather than the standard two-parameter model.
+
+## Two-Parameter Fitting and Smoothing
+
+The results of the two-parameter model fitting tests are summarized in the \texttt{Tests/Noisy\_fitting\_test.R} file. 
+
+In the plot below, the left column shows the logistic time series data, and the right column shows $1/b_i$ vs. $P_i$, which is actually the line we are obtaining the equation of using our least squares model. (Note that for future work, the plots should be cleaned up to have proper titles and annotations!)
+
+The top two plots are for data generated using the analytic solution with no noise, the middle two plots have $0.04\%$ noise, and the bottom two plots have $4\%$ noise. I also generated the last case with $10\%$ noise just to really show the problem: the noise messes the computation up so badly that we get an NaN warning! (If you are interested in seeing this, this result is in the mentioned `R` script, but I commented it out due to errors being produced!) The parameters used to generate these data are $r = 0.2; k = 1000$ with time steps of $0.1$ and an initial population size of $100$.
+
+```{r 2Param}
+source(here::here("Tests","Noisy_fitting_test.R"))
+```
+
+From the outputted results and the plots, we can make a few observations.
+\begin{enumerate}
+\item In the case with no noise, we get the population parameters back almost exactly. They aren't *exact* fits, but they are really very close.
+\item In the case with low noise, our results are very close to the results with no noise, and are thus very close to the population parameters. However, notice that while \(r\) is very close to correct, \(K\) got worse faster.
+\item In the case with high noise, the fits are not very good at all! Notably, the fit for \(r\) is super overestimated, and the fit for $K$ is super underestimated.
+\item In the linear plots (the right column), we can see that the points move further away from the line as we get to higher values of \(i\); error is increasing over time. We currently believe that this is due to the nature of the inverse problem, and the error is magnified by the log discretization and the reciprocals in the parameter calculations, which have an effect of magnifying the error.
+\item If we go to even $10\%$ noise, our results stop making sense because we end up taking the log of negatives, and having negatives here doesn't really make a lot of sense anyways.
+\item However, all of our results are still in the range that give us the correct stability condition, which is good.
+\end{enumerate}
+
+Now let's examine the case with smoothing. (A lot of this code will be copied from the file `Tests\Smoothing_test.Rmd`; I ported it into anothe `R` script for the sake of conciseness here.) Here, I generated the data with no noise, and with $4\%$ Gaussian noise, since this amount was problematic enough to give poor estimates, but not problematic enough to break the discretization machinery.
+
+First, let's see what happens when we apply smoothing to data without added noise. I used the same parameters as before ($r = 0.2; k = 1000$) to generate these data.
+
+```{r 2pSmoothingNN}
+source(here::here("Tests","Smoothing_demo_no_noise.R"))
+```
+
+Just as we would expect, if we apply smoothing to a case where the fit is already accurate, we get worse results. Smoothing forces the parameters to be smaller than the ordinary least squares estimate, so if we force the paraemeters to be smaller than a correct fit, of course we get a mess.
+
+Now, given that the data with $4\%$ Gaussian noise was messy enough to give a bad fit, but not messy enough to break the discretization machinery, let's apply smoothing to this case.
+
+```{r 2pSmoothingWN}
+source(here::here("Tests","Smoothing_demo_with_noise.R"))
+```
+
+This is an interesting result! We see that as we increase the value of the smoothing parameter we get closer and closer to the true value of `r`. However, we make a sacrifice here! Since the value of \(K\) is already underestimated by the model, smoothing does not help us!
+
+Smoothing forces parameters to be smaller, so if we are biased towards underestimating a parameter, smoothing does not solve our problem. We attempted to deal with this by moving to the dimensionless version of the one-species logistic growth model.
+
+## One-Parameter Reduction
+
+A common technique for dealing with data that have a maximum value (in this case, the carrying capacity), or when the relative values matter more than the absolute values, in the sciences is to normalize the data. I am personally most familiar with this concept in the analysis of fluorescene microscopy data, where light intensity values from a microscope image are typically divided by the maximum intensity, because the maximum actual intensity is not as imporant as the relative intensities.
+
+We can apply this same concept to our model. Say we normalize our model by dividing both sides of our ODE by the maximal value, $K$. We get
+$$\frac{dP}{dt}\frac{1}{k} = \frac{rP}{K}\left(1 - \frac{P}{K}\right).$$
+Now, we make the substitution $x = \frac{P}{k}$. We get
+$$\frac{dx}{dt} = rx(1-x),$$
+which notably only has one parameter, instead of the two parameters we were dealing with before. The easiest way to visualize this model is to think of the model describing the population size as a proportion of the carrying capacity, rather than describing the actual population size as a number of individuals. In effect, our carrying capacity has become 1.
+
+I have rewritten many of the functions used in the two-parameter case to fit this case, and they can be found in the `Dimensionless_exploration.R` script.
+
+Now that we have established our dimensionless model, let's look at some of the same examples. First, let's look at the regular comparison between non-noisy and noisy data. For these models, I had to adjust which parameters to use, so I will be using \(r = 0.1, P_0 = 0.1\), with a time step of 0.1.
+
+```{r 1dDemo}
+source(here::here("Tests", "Noisy_fitting_demo_1D.R"))
+```
+
+Wow, this time our predictions are actually a lot better and less affected by noise! However, we still get the same issue where if we increase noise too much we have to deal with NaN values--using anything around 0.1 or higher I ended up with NaNs; that makes sense, sense this is the initial condition. So, our $r$ prediction in the $4\%$ Gaussian noise case still isn't great, but it's honestly better than I was expecting when I started messing with the dimensionless model.
+
+Now, let's look at the case with smoothing when there is no noise. I used the same parameters as above (i.e. $r = 0.1$).
+```{r 1pNNsmooth}
+source(here::here("Tests", "1p_Smoothing_NN_demo.R"))
+```
+
+Foremost, we can see the same result as last time: if we apply low smoothing, not much changes. Once we get to high values of smoothing, our value of `r` begins to be depressed by smoothing and our fit becomes less accurate, as we would expect. Now let's look at the interesting case: smoothing noisy data.
+
+```{r 1pWNsmooth}
+source(here::here("Tests", "1p_Smoothing_WN_demo.R"))
+```
+
+Now that's great! When we get to sufficiently high values of the smoothing parameter, we get closer to the correct estimate! However, if we overshoot the smoothing parameter, our estimate gets worse again. This is what we should expect: since we're only looking at one parameter, if we overestimate that parameter, as the model tends to do with $r$, we should just be able to apply the correct amount of smoothing to lower the value of $r$. Now our main concern is figuring out what the correct value of $r$ is.
+
+# Conclusions and Further Work
+
+The main conclusion of my work is that the one-species problem is prone to the same error as the two-species problem (and higher-dimensional problems as well). So, rather than the error being from computational issues or issues with the least squares method, we hypothesize that the main source of error is the inverse problem itself. We saw that even when our \(A\) matrix in the single parameter case was \(1 \times 1\), and thus has condition number \(\kappa_A = 1\) (i.e. \(A\) is well-conditioned), we had issues with error. 
+
+Smoothing didn't really help too much in the two parameter case: it's kind of like a double-edged sword. Applying smoothing makes the estimate of $r$ better, but it makes the estimation of $K$ worse, since our model tends to underestimate $K$ anyway and smoothing forces smaller parameter values. However, we saw that smoothing can help find the correct parameter estimates in the dimensionless case. One of our next major goals is to determine how to pick a good smoothing value based on what we see in the data. We came up with two major approaches to tackling this problem: an observational approach which relies on generating large amounts of time-series data and finding the best smoothing value in each test case, or by using the sum of squared residuals as an objective function to minimize in a more general way to find the best smoothing parameter.
+
+However, in each case we observed that all parameters were predicted to be positive real numbers, within a few orders of magnitude of the true population parameter. This suggests that the stability conditions in higher-dimensional problems and the relationships between species might be preserved, although it is difficult to extrapolate these conclusions definitively from the one-species problem. In each test problem we fitted parameters to, we still obtained parameters in the correct range to predict the system would tend towards the stable equilibrium.
+
+One preliminary step before moving on from this project may be to implement QR or SVD methods rather than the Moore-Penrose Generalized Inverse in the least-squares step, which is currently implemented. However, we do not expect this change to make a significant impact. Future research will likely concern ways to further mitigate the error, and applying these methods to real one-dimensional data. A further step in dealing with real one-dimensional data may be choosing an appropriate normalization method so that the one-parameter least squares model can be applied.
+
+# References
