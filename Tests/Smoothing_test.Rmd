@@ -14,7 +14,7 @@ source(here::here("Scripts", "Sample_data_generation.R"))
 source(here::here("Scripts", "Dimensionless_exploration.R"))
 source(here::here("Scripts", "Helpers.R"))
 
-set.seed(100)
+set.seed(300)
 ```
 
 # Testing two-dimensional smoothing.
@@ -42,7 +42,7 @@ plain_2p_wn <- model_logistic_data(prep_2p_wn)
 ```
 
 Test a range of smoothing values.
-```{r Smoothing test}
+```{r 2p Smoothing test}
 smoothing_vals <- c(0.001, 0.01, 0.1, 1, 2, 5, 10, 100)
 i <- 1
 for (lambda in smoothing_vals) {
@@ -92,4 +92,9 @@ for (lambda in smoothing_vals) {
 }
 ```
 
+Questions:
+1. Two dimensions scaled problem--dimensionless with two unknowns ($k=1$).
+2. If we don't know the parameters beforehand, how do we know how much smoothing to do? 
+(Maybe generate a bunch of time series, and then find the best smooth parameter for each. Try to find a trend in the best lambda to use.) 
+(Within the same model, take a lot of the data and build an objective function - SSR. Run model on ~4/5 of data and test on ~1/5 of data with different values of lambda. Whichever lambda minimizes SSR is best.)
 
