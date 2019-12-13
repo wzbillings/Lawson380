@@ -1,9 +1,10 @@
 ---
-title: "Fall 2019 Research Manuscript"
+title: "One-Species Logistic Growth Parameter Estimation with Tikhonov Regularization"
 author: "Zane Billings"
 date: "12 December, 2019"
 output: pdf_document
 bibliography: references.bib
+abstract: "Existing competition models for the human gut microbiome typically use several species at once, raising an interesting question: if we consider pairwise combinations of these species, will we get the same results as in the larger model? Previous work by the HMBG at Warren Wilson College and Western Carolina University have attempted to solve this problem, but have encountered substantial error in trying to fit parameters to time-series data. In order to hone in on the source of the error, we examine the single species modeling case using the same least squares machinery as previous results, and additionally examine the application of Tikhonov regularization to the problem. We find that small amounts of error deviating from the expected trend in time-series data leads to serious errors in estimating both the intrinsic growth rate and carrying capacity, but when the model is converted to its dimensionless form, we can recover the intrinsic growth rate from noisy data by applying Tikhonov regularization."
 ---
 
 ```{r setup, include=FALSE}
