@@ -46,7 +46,7 @@ model_logistic_data_dimensionless <-
   }
 
 model_logistic_data_dimensionless_smoothing <- 
-  function(input_data, smoothing_val, make_plot = FALSE){
+  function(input_data, smoothing_val, make_plot = FALSE, print_res = FALSE){
     # This function uses a derived least-squares method with an Euler
     #  discretization in order to solve for the parameters of the logistic
     #  equation modeling the inputted data.
@@ -74,8 +74,9 @@ model_logistic_data_dimensionless_smoothing <-
     params <- MASS::ginv(ATA + smoothing_val * ID) %*% t(A) %*% b
     
     r_hat <- params[1]
-    cat("The estimated growth rate is:", r_hat,"\n")
-    
+    if (print_res) {
+      cat("The estimated growth rate is:", r_hat,"\n")
+    }
     # Optionally make a linear plot showing the data the regression equation
     #  is obtained from.
     if (make_plot == TRUE) {

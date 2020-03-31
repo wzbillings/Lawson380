@@ -144,7 +144,7 @@ model_end_only <- function(input_data, make_plot = FALSE) {
 }
 
 model_logistic_data_smoothing <- 
-  function(input_data, smoothing_value, make_plot = FALSE){
+  function(input_data, smoothing_value, make_plot = FALSE, print_res = FALSE){
     # This function uses a derived least-squares method with an Euler
     #  discretization in order to solve for the parameters of the logistic
     #  equation modeling the inputted data.
@@ -172,8 +172,10 @@ model_logistic_data_smoothing <-
     r_hat <- params[1]
     m_hat <- params[2]
     K_hat <- (r_hat/m_hat)
-    cat("The estimated growth rate is:", r_hat,
-        "\nThe estimated carrying capacity is:", K_hat, "\n")
+    if (print_res) {
+      cat("The estimated growth rate is:", r_hat,
+          "\nThe estimated carrying capacity is:", K_hat, "\n")
+    }
     
     # Optionally make a linear plot showing the data the regression equation
     #  is obtained from.
