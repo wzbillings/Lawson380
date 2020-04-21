@@ -6,7 +6,7 @@ output: pdf_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, cache = TRUE)
 ```
 
 # Is lambda related to the value of *r* in the original population?
@@ -34,7 +34,7 @@ k <- 3 # k-fold cross validation constant
 lstar <- numeric(length(rs))
 ```
 
-```{r r vs. lambda, cache = TRUE}
+```{r r vs. lambda}
 for (r in rs) {
   # Generate and partition data
   df <- generate_dimensionless_logistic_data(.1, r, 50, 0.1)
@@ -88,7 +88,36 @@ Now we need to collect the values of *r* and \(\lambda^*\) together and we can v
 ```{r results plot}
 res <- data.frame("r" = rs,
                   "l" = lstar)
-with(res, plot(r,l, type = "l"))
-with(res[res$r >= 0.5 & res$r <= 1, ], plot(r,l, type = "l"))
-with(res[res$r <= 0.5 & res$r >= 0.05, ], plot(r,l, type = "l"))
+with(res, plot(r,l, type = "l", 
+               xlab = "Intrinsic growth rate",
+               ylab = "Optimal lambda",
+               main = "Optimal lambda vs. R"))
+with(res[res$r >= 0.5 & res$r <= 1, ], plot(r,l, type = "l", 
+               xlab = "Intrinsic growth rate",
+               ylab = "Optimal lambda",
+               main = "1 > r > 0.5"))
+with(res[res$r <= 0.5 & res$r >= 0.05, ], plot(r,l, type = "l", 
+               xlab = "Intrinsic growth rate",
+               ylab = "Optimal lambda",
+               main = "0.5 > r > 0.05"))
+```
+
+THis curve (starting at around r = 0.05 to exclude the major outliers) can probably be modeled well by an expontential decay curve. Here, I have just modeled it with a LOESS curve but an exponential fit might be worth examining.
+
+```{r model, message = FALSE}
+library(tidyverse)
+res %>%
+  filter(res$r > 0.05) %>%
+  ggplot(aes(x = r, y = l)) +
+    geom_point() +
+    labs(x = "Intrinsic growth rate", y = "Optimal lambda") +
+    geom_smooth(method = "loess")
+
+res %>%
+  filter(res$r > 0.05) %>%
+  ggplot(aes(x = r, y = l)) +
+    geom_point() +
+    scale_y_log10() +
+    labs(x = "Intrinsic growth rate", y = "log10(optimal lambda)") +
+    geom_smooth(method = "lm")
 ```

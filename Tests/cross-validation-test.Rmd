@@ -130,10 +130,11 @@ Now let's run do a test with one parameter value to see if I can do this right.
 
 ```{r test model}
 source(here::here("Scripts", "Least_squares_methods.R"))
+# Holder for calculated CVEs
 cves <- numeric(length(lambdas))
 for (a in 1:length(lambdas)) {
-l = lambdas[[a]]
-errors <- numeric(length(parts))
+l = lambdas[[a]] # Grab the value of lambda
+errors <- numeric(length(parts)) # Holder for SSEs
 # Need to do this k number of times (# of parts)
 for (i in 1:k) {
   # Grab the first combo of indices to use
