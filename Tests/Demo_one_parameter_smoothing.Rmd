@@ -1,0 +1,85 @@
+---
+title: "Demo: Dimensionless Model with Smoothing"
+author: "Zane Billings"
+date: "13 December, 2019"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, cache = TRUE)
+```
+
+This document contains demos for smoothing with and without noise.
+
+```{r options}
+require(here)
+source(here::here("Scripts", "Dimensionless_exploration.R"))
+source(here::here("Scripts", "Helpers.R"))
+set.seed(300)
+```
+
+Testing noisy data generation.
+
+```{r gen}
+par(mfrow = c(3,2))
+
+# Generate data with no noise.
+cat("No noise\n")
+test_analytic <- generate_dimensionless_logistic_data(.1, 0.1, 50, 0.1, TRUE)
+prepped_analytic <- prep_data(test_analytic)
+model_2 <- model_logistic_data_dimensionless(prepped_analytic, TRUE)
+
+# Generate data with almost no noise.
+cat("\n0.04% noise\n")
+test_low_noise <- generate_noisy_dimensionless_logistic_data(0.1, 0.1, 0.0004, 50, 0.1, TRUE)
+prepped_low_noise <- prep_data(test_low_noise)
+model_low_noise <- model_logistic_data_dimensionless(prepped_low_noise, TRUE)
+
+# Generate data with noise.
+cat("\n4% noise\n")
+test_high_noise <- generate_noisy_dimensionless_logistic_data(0.1, 0.1, 0.04, 50, 0.1, TRUE)
+prepped_high_noise <- prep_data(test_high_noise)
+model_high_noise <- model_logistic_data_dimensionless(prepped_high_noise, TRUE)
+par(mfrow = c(1,1))
+```
+
+First without noise.
+
+```{r smoothing NN}
+test_1p_nn <- generate_dimensionless_logistic_data(.1, 0.1, 50, 0.1, TRUE)
+prep_1p_nn <- prep_data(test_1p_nn)
+cat("Regular; no noise.\n")
+plain_1p_nn <- model_logistic_data_dimensionless(prep_1p_nn)
+cat("Smoothing = 0.001; no noise\n")
+ridge_1p_nn <- model_logistic_data_dimensionless_smoothing(prep_1p_nn, 0.001, print_res = TRUE)
+cat("Smoothing = 0.01; no noise\n")
+ridge_1p_nn <- model_logistic_data_dimensionless_smoothing(prep_1p_nn, 0.01, print_res = TRUE)
+cat("Smoothing = 0.1; no noise\n")
+ridge_1p_nn <- model_logistic_data_dimensionless_smoothing(prep_1p_nn, 0.1, print_res = TRUE)
+cat("Smoothing = 1; no noise\n")
+ridge_1p_nn <- model_logistic_data_dimensionless_smoothing(prep_1p_nn, 1, print_res = TRUE)
+cat("Smoothing = 10 ; no noise\n")
+ridge_1p_nn <- model_logistic_data_dimensionless_smoothing(prep_1p_nn, 10, print_res = TRUE)
+```
+
+And again with noise.
+```{r smoothing WN}
+test_1p_wn <- generate_noisy_dimensionless_logistic_data(0.1, 0.1, 0.05, 50, 0.1, TRUE)
+prep_1p_wn <- prep_data(test_1p_wn)
+cat("Regular; no noise.\n")
+plain_1p_wn <- model_logistic_data_dimensionless(prep_1p_wn)
+cat("Smoothing = 0.001; 4% noise\n")
+ridge_1p_wn <- model_logistic_data_dimensionless_smoothing(prep_1p_wn, 0.001,print_res = TRUE)
+cat("Smoothing = 0.01; 4% noise\n")
+ridge_1p_wn <- model_logistic_data_dimensionless_smoothing(prep_1p_wn, 0.01,print_res = TRUE)
+cat("Smoothing = 0.1; 4% noise\n")
+ridge_1p_wn <- model_logistic_data_dimensionless_smoothing(prep_1p_wn, 0.1,print_res = TRUE)
+cat("Smoothing = 1; 4% noise\n")
+ridge_1p_wn <- model_logistic_data_dimensionless_smoothing(prep_1p_wn, 1,print_res = TRUE)
+cat("Smoothing = 10 ; 4% noise\n")
+ridge_1p_wn <- model_logistic_data_dimensionless_smoothing(prep_1p_wn, 10,print_res = TRUE)
+cat("Smoothing = 20 ; 4% noise\n")
+ridge_1p_wn <- model_logistic_data_dimensionless_smoothing(prep_1p_wn, 20,print_res = TRUE)
+cat("Smoothing = 100 ; 4% noise\n")
+ridge_1p_wn <- model_logistic_data_dimensionless_smoothing(prep_1p_wn, 100,print_res = TRUE)
+```
