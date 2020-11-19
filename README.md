@@ -1,4 +1,6 @@
-# R Codes for MATH 380 (Math Research) with Dr. Lawson; Fall 2019.
+# See HMBGR repo for the up-to-date version of code!
+
+# HMBGR contains improved code in an easier-to-use format!
 
 Project goal: develop least squares methods to obtain parameters from data which is best modelled by the logistic ODE.
 
